@@ -6,7 +6,7 @@ const port = 3000;
 app.set('view engine', 'ejs');
 // Correct route handler:
 app.get('/', (req, res) => {
-    res.render('index'); // Correctly renders the 'index.ejs' template
+    res.render('login'); // Correctly renders the 'index.ejs' template
   });
   
 
