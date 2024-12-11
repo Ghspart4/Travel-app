@@ -1,7 +1,19 @@
 // Importing the required modules
-const express = require('express');
-const app = express();
-const port = 3000;
+var express = require('express');
+var app = express();
+var session = require('express-session');
+//const dbConfig = require('./dbConfig');
+
+app.set('view engine','ejs');
+app.use(session({
+    secret: 'yoursecret',
+    resave: true,
+    saveUninitialized: true
+}));
+app.use('/public', express.static('public'));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 // Correct route handler:
@@ -11,6 +23,7 @@ app.get('/', (req, res) => {
   
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${3000}/`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

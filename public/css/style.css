@@ -82,6 +82,7 @@ body {
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     transition: .2s;
+    margin-top: 25%;
 }
 
 .btn-1{
@@ -104,6 +105,7 @@ body {
     width: 100%;
     padding: 0 4vw;
     transition: all .5s ease-in-out;
+    top: 25px;
 }
 
 .register-form{
@@ -116,6 +118,7 @@ body {
     width: 100%;
     padding: 0 4vw;
     transition: all .5s ease-in-out;
+    top: 25px;
 }
 
 
@@ -209,6 +212,14 @@ body {
     }
     .col-right{
         width: 100%;
+        margin-bottom: 10%;
     }
 }
 
+/* For smaller screens, such as mobile devices */
+@media (max-width: 892px) {
+    .btn {
+        margin-top: 1%;  /* Adjust margin-top for smaller screens */
+        padding: 5px 20px;  /* Optionally adjust padding for smaller screens */
+    }
+}
