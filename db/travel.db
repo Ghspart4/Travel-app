@@ -2,10 +2,10 @@
 ----Users Table----
 CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    firstname VARCHAR(255) NOT NULL,
-    lastname VARCHAR(255) NOT NULL,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    firstname VARCHAR(255),
+    lastname VARCHAR(255),
+    username VARCHAR(255), 
+    password VARCHAR(255),
     email VARCHAR(100) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

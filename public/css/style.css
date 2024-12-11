@@ -201,7 +201,16 @@ body {
     gap: 15px;
 }
 
+button {
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    color: aliceblue;
+}
 
+button:hover {
+    opacity: 0.85;
+    color: black;
+}
 @media (max-width: 892px) {
     .form-container{
         width: auto;
