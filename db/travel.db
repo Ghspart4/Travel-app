@@ -1,0 +1,103 @@
+
+----Users Table----
+CREATE TABLE Users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    firstname VARCHAR(255) NOT NULL,
+    lastname VARCHAR(255) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+----Trips Table----
+CREATE TABLE Trips (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    trip_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
+
+----itinerary Table----
+CREATE TABLE Itineraries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    trip_id INT NOT NULL,
+    itinerary_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (trip_id) REFERENCES Trips(id) ON DELETE CASCADE
+);
+
+----Flights Table----
+CREATE TABLE Flights (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    itinerary_id INT NOT NULL,
+    airline VARCHAR(100) NOT NULL,
+    flight_number VARCHAR(50),
+    departure_time DATETIME,
+    arrival_time DATETIME,
+    layovers JSON, -- For storing layover details
+    cost DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (itinerary_id) REFERENCES Itineraries(id) ON DELETE CASCADE
+);
+
+---- Cars Table----
+CREATE TABLE Cars (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    itinerary_id INT NOT NULL,
+    booking_id VARCHAR(100),
+    rego VARCHAR(50),
+    pickup_location VARCHAR(200),
+    dropoff_location VARCHAR(200),
+    pickup_time DATETIME,
+    dropoff_time DATETIME,
+    cost DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (itinerary_id) REFERENCES Itineraries(id) ON DELETE CASCADE
+);
+
+---- Accommodations Table----
+CREATE TABLE Accommodations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    itinerary_id INT NOT NULL,
+    hotel_name VARCHAR(100),
+    check_in_date DATE,
+    check_out_date DATE,
+    room_type VARCHAR(100),
+    cost DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (itinerary_id) REFERENCES Itineraries(id) ON DELETE CASCADE
+);
+
+
+----Activities Table----
+CREATE TABLE Activities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    itinerary_id INT NOT NULL,
+    activity_name VARCHAR(100) NOT NULL,
+    location VARCHAR(200),
+    time TIME,
+    cost DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (itinerary_id) REFERENCES Itineraries(id) ON DELETE CASCADE
+);
+
+----Others Table----
+CREATE TABLE Others (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    itinerary_id INT NOT NULL,
+    description TEXT,
+    cost DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (itinerary_id) REFERENCES Itineraries(id) ON DELETE CASCADE
+);

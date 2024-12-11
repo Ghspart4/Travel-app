@@ -1,0 +1,28 @@
+/* icon */
+footer{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+footer ul{
+    list-style: none;
+}
+
+footer {
+    color: #fff;
+    background: #121315;
+}
+
+footer p {
+    color: #ccc;
+    max-width: 25em;
+    font-size: 0.9em;
+    line-height: 23px;
+}
+
+footer a {
+    color: #fff;
+    text-decoration: none;
+}
+
