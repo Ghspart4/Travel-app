@@ -22,6 +22,27 @@ SET time_zone = "+00:00";
 --
 
 -- --------------------------------------------------------
+-- --------------------------------------------------------
+-- Table structure for table `todos`
+-- --------------------------------------------------------
+
+CREATE TABLE `todos` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_id` INT(11) NOT NULL,
+  `trip_id` INT(11) DEFAULT NULL,
+  `itinerary_id` INT(11) DEFAULT NULL,
+  `task` VARCHAR(255) NOT NULL,
+  `status` ENUM('Pending', 'In Progress', 'Completed') NOT NULL DEFAULT 'Pending',
+  `due_date` DATE DEFAULT NULL,
+  `priority` ENUM('Low', 'Medium', 'High') DEFAULT 'Medium',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`trip_id`) REFERENCES `trips`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`itinerary_id`) REFERENCES `itineraries`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-----------------------------------------------------------------------------------
 
 --
 -- Table structure for table `accommodations`
