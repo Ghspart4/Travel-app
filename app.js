@@ -85,8 +85,14 @@ app.get('/adminOnly', isAuthenticated, isRole('admin'), async (req, res) => {
 
 // Premium Route
 app.get('/premiumOnly', isAuthenticated, isRole('premium'), (req, res) => {
-    res.render('premiumOnly', { email: req.session.email });
+    const userDetails = {
+        email: req.session.email,
+        name: req.session.name, // Assuming name is stored in session
+        // Add other user details as needed
+    };
+    res.render('premiumOnly', { user: userDetails });
 });
+
 
 // Customer Route
 app.get('/customerOnly', isRole('customer'), (req, res) => {

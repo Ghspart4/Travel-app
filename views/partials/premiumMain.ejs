@@ -30,17 +30,9 @@
   
     <section id="profile" class="section">
         <div class="container">
-            <h2>Profile</h2>
-            <p>Your profile information is displayed below:</p>
             <div class="profile-details">
-                <h3>Customer Details</h3>
-                <ul>
-                    <li><strong>Full Name:</strong> <%= user.fullname %></li>
-                    <li><strong>Email Address:</strong> <%= user.email %></li>
-                    <li><strong>Contact Number:</strong> <%= user.contactNumber || 'N/A' %></li>
-                    <li><strong>Role:</strong> <%= user.role %></li>
-                    <li><strong>Address:</strong> <%= user.address || 'N/A' %></li>
-                </ul>
+                <h1>Welcome <%= user.fullName %></h1>
+                <p>Email: <%= user.email %></p>
             </div>
         </div>
     </section>
