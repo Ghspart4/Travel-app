@@ -1,0 +1,8 @@
+git add .
+git commit -m "Your descriptive commit message here"
+git push origin main
+
+git pull origin main
+
+
+git stash and delete index.lock if pull does not work 

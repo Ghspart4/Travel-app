@@ -1,0 +1,47 @@
+<main>
+    <section id="home" class="section active">
+        <div class="container">
+            <h1>Plan Your Journey With Confidence</h1>
+            <p class="words">Your all-in-one travel companion for seamless trip planning, itinerary management, and unforgettable adventures</p>
+            <a href="../login.ejs">
+                <button class="botton">Start Planning</button>
+            </a>
+        </div>
+        <div class="container">
+            <h4>Smart Itineraries</h4>
+            <p class="words">Create detailed travel plans with our intuitive planning tools. Organize flights, accommodations, and activities in one place.</p>
+        </div>
+        <div class="container">
+            <h4>Todo Lists</h4>
+            <p class="words">Stay organized with customizable checklists for packing, pre-trip preparations, and daily activities during your journey.</p>
+        </div>
+        <div class="container">
+            <h4>Travel Calendar</h4>
+            <p class="words">Visualize your entire trip timeline. Sync events, bookings, and reservations in an easy-to-view calendar format.</p>
+        </div>
+    </section>
+
+    <section id="calendar" class="section">
+        <div class="container">
+            <h2>Calendar</h2>
+            <p>Your calendar will be displayed here.</p>
+        </div>
+    </section>
+  
+    <section id="profile" class="section">
+        <div class="container">
+            <h2>Profile</h2>
+            <p>Your profile information is displayed below:</p>
+            <div class="profile-details">
+                <h3>Customer Details</h3>
+                <ul>
+                    <li><strong>Full Name:</strong> <%= user.fullname %></li>
+                    <li><strong>Email Address:</strong> <%= user.email %></li>
+                    <li><strong>Contact Number:</strong> <%= user.contactNumber || 'N/A' %></li>
+                    <li><strong>Role:</strong> <%= user.role %></li>
+                    <li><strong>Address:</strong> <%= user.address || 'N/A' %></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</main>

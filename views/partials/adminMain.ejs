@@ -21,7 +21,7 @@
         </div>
     </section>
   
-    <section id="dashboard" class="section active">
+    <section id="dashboard" class="section">
         <div class="container">
             <h2>Users Management</h2>
             
@@ -45,9 +45,11 @@
                                 <td><%= user.email %></td>
                                 <td><%= user.role %></td>
                                 <td>
-                                    <button class="btn edit-btn" onclick="editUser(<%= user.id %>)">Edit</button>
-                                    <button class="btn delete-btn" onclick="deleteUser(<%= user.id %>)">Delete</button>
-                                </td>                                
+                                    <div class="action-buttons">
+                                        <button class="btn edit-btn" onclick="editUser(<%= user.id %>)"></button>
+                                        <button class="btn delete-btn" onclick="deleteUser(<%= user.id %>)"></button>
+                                    </div>
+                                </td>
                             </tr>
                         <% }); %>
                     </tbody>
@@ -66,14 +68,15 @@
                         <option value="Premium">Premium</option>
                         <option value="Admin">Admin</option>
                     </select>
-                    <button type="submit" class="btn add-btn">Add User</button>
+                    <button class="add-btn" id="add-user-btn" title="Add User"></button>
                 </form>
             </div>
             
             <div id="edit-modal" class="modal">
                 <div class="modal-content">
+                    <button class="modal-close">&times;</button>
                     <h3>Edit User</h3>
-                    <form id="edit-user-form" class="edit-user-form">
+                    <form id="edit-user-form" class="user-form edit-user-form">
                         <input type="hidden" id="edit-user-id" name="id">
                         <input type="text" id="edit-fullname" name="fullname" placeholder="Full name" required>
                         <input type="email" id="edit-email" name="email" placeholder="User Email" required>
@@ -83,14 +86,14 @@
                             <option value="Premium">Premium</option>
                             <option value="Admin">Admin</option>
                         </select>
-                        <button type="submit" class="btn add-btn">Save</button>
+                        <button type="submit" class="btn">Save</button>
                     </form>
                 </div>
-            </div>            
+            </div>
         </div>
     </section>
  
-  
+
     <section id="calendar" class="section">
         <div class="container">
             <h2>Calendar</h2>
