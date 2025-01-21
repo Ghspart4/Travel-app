@@ -82,16 +82,30 @@ app.get('/adminOnly', isAuthenticated, isRole('admin'), async (req, res) => {
         res.status(500).send('Error fetching data');
     }
 });
+app.get('/premiumOnly', isAuthenticated, isRole('premium'), async (req, res) => {
+    try {
+        const userId = req.session.userId; // Assuming session user ID is set during login
+        
+        // Query the todos table for the logged-in user
+        const [todoList] = await pool.execute('SELECT * FROM todos WHERE user_id = ?', [userId]);
 
-// Premium Route
-app.get('/premiumOnly', isAuthenticated, isRole('premium'), (req, res) => {
-    const userDetails = {
-        email: req.session.email,
-        name: req.session.name, // Assuming name is stored in session
-        // Add other user details as needed
-    };
-    res.render('premiumOnly', { user: userDetails });
+        const userDetails = {
+            email: req.session.email,
+            name: req.session.name,
+            userId: req.session.userId
+        };
+
+        res.render('premiumOnly', {
+            user: userDetails,
+            userId: req.session.userId,
+            todoList: todoList // Pass the todo list to the template
+        });
+    } catch (error) {
+        console.error('Error fetching todo list:', error);
+        res.status(500).send('Server error');
+    }
 });
+
 
 
 // Customer Route
@@ -213,6 +227,8 @@ app.post('/addUser', isAuthenticated, isRole('admin'), async (req, res) => {
     }
 });
 
+
+// User Authentication Route
 // User Authentication Route
 app.post('/auth', async (req, res) => {
     const { Email, password } = req.body;
@@ -228,20 +244,15 @@ app.post('/auth', async (req, res) => {
         req.session.loggedin = true;
         req.session.email = Email;
         req.session.role = user.role;
-
-         // console.log statements
-          console.log("User role:", user.role);
-          console.log("User name:", user.fullname);
-          console.log("User email:", user.email);
-  
-
+        req.session.userId = user.id; // Add this line to store userId in session
+       
         if (user.role === 'admin') {
             res.redirect('/adminOnly');
         } else if (user.role === 'premium') {
             res.redirect('/premiumOnly');
         } else if (user.role === 'customer') {
             res.redirect('/customerOnly');
-        }   else {
+        } else {
             res.redirect('/login');
         }
     } catch (err) {
@@ -249,6 +260,83 @@ app.post('/auth', async (req, res) => {
         res.send('Error during login');
     }
 });
+
+// Get all todos
+app.get('/getTodos', async (req, res) => {
+    try {
+        const [rows] = await pool.execute('SELECT * FROM todos WHERE user_id = ? ORDER BY due_date ASC', [1]);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching todos:', err);
+        res.status(500).json({ error: 'Error fetching todos' });
+    }
+});
+
+// Get single todo
+app.get('/getTodo/:id', async (req, res) => {
+    try {
+        const [rows] = await pool.execute('SELECT * FROM todos WHERE id = ?', [req.params.id]);
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ error: 'Todo not found' });
+        }
+    } catch (err) {
+        console.error('Error fetching todo:', err);
+        res.status(500).json({ error: 'Error fetching todo' });
+    }
+});
+
+// Add new todo
+app.post('/addTodo', async (req, res) => {
+    const { user_id, task, status, due_date, priority } = req.body;
+
+    try {
+        const [result] = await pool.execute(
+            'INSERT INTO todos (user_id, task, status, due_date, priority) VALUES (?, ?, ?, ?, ?)',
+            [user_id, task, status, due_date, priority]
+        );
+        
+        const [todos] = await pool.execute('SELECT * FROM todos WHERE user_id = ? ORDER BY due_date ASC', [user_id]);
+        res.json(todos);
+    } catch (err) {
+        console.error('Error adding todo:', err);
+        res.status(500).json({ error: 'Error adding todo' });
+    }
+});
+
+// Update todo
+app.post('/editTodo/:id',  async (req, res) => {
+    const { task, status, due_date, priority } = req.body;
+    const todoId = req.params.id;
+
+    try {
+        await pool.execute(
+            'UPDATE todos SET task = ?, status = ?, due_date = ?, priority = ? WHERE id = ?',
+            [task, status, due_date, priority, todoId]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error updating todo:', err);
+        res.status(500).json({ success: false, error: 'Failed to update todo' });
+    }
+});
+// Delete todo
+app.post('/deleteTodo/:id', async (req, res) => {
+    try {
+        const [result] = await pool.execute('DELETE FROM todos WHERE id = ?', [req.params.id]);
+        if (result.affectedRows > 0) {
+            res.json({ success: true, message: 'Todo deleted successfully' });
+        } else {
+            res.status(404).json({ success: false, error: 'Todo not found' });
+        }
+    } catch (err) {
+        console.error('Error deleting todo:', err);
+        res.status(500).json({ success: false, error: 'Error deleting todo' });
+    }
+});
+
+
 
 // Logout Route
 app.post('/logout', (req, res) => {
@@ -260,6 +348,7 @@ app.post('/logout', (req, res) => {
         res.redirect('/');
     });
 });
+
 
 // Start the server
 const PORT = process.env.PORT || 3000;

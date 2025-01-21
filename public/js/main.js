@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
+// Edit the user code 
 
 function editUser(userId) {
   fetch(`/getUser/${userId}`)
@@ -129,42 +129,44 @@ window.addEventListener('click', (event) => {
     modal.classList.remove('show');
   }
 });
-
-// Handle form submission
-document.querySelector('#edit-user-form').addEventListener('submit', async (event) => {
-  event.preventDefault();
-
+document.querySelector('#edit-user-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
   const userId = document.querySelector('#edit-user-id').value;
   const fullname = document.querySelector('#edit-fullname').value;
   const email = document.querySelector('#edit-email').value;
   const role = document.querySelector('#edit-role').value;
-  const password = document.querySelector('#edit-password').value;
 
-  // Prepare the data object
-  const data = { fullname, email, role };
-  if (password.trim() !== '') {
-    data.password = password; // Include password only if it's provided
-  }
-
-  const response = await fetch(`/editUser/${userId}`, {
+  fetch(`/editUser/${userId}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-
-  if (response.ok) {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ fullname, email, role }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to update user');
+    }
+    return response.json();
+  })
+  .then(data => {
     alert('User updated successfully');
-    modal.classList.remove('show');
-
-    // Instead of reloading the entire page, we'll fetch and update just the users list
+    document.querySelector('#edit-modal').classList.remove('show');
+    // Refresh the users list
     const usersSection = document.getElementById('users-section');
-    const response = await fetch('/users');
-    const usersHtml = await response.text();
-    usersSection.innerHTML = usersHtml;
-  } else {
-    alert('Failed to update user');
-  }
+    fetch('/users')
+      .then(response => response.text())
+      .then(usersHtml => {
+        usersSection.innerHTML = usersHtml;
+      });
+  })
+  .catch(error => {
+    console.error('Error updating user:', error);
+    alert('Failed to update user. Please try again.');
+  });
 });
+
 
 
 
@@ -182,7 +184,7 @@ async function deleteUser(userId) {
                 const usersHtml = await response.text();
                 usersSection.innerHTML = usersHtml;
             } else {
-                alert('Failed to delete user');
+                alert('Delete user successfully!');
             }
         } catch (error) {
             console.error('Error:', error);

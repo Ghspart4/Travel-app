@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashnoard</title>
+  <meta name="user-id" content="<%= userId %>">
+  <title>Premium Dashboard</title>
   <link rel="stylesheet" href="/css/dashboard.css">
   <script type="text/javascript" src="/js/main.js" defer></script>
 </head>
@@ -13,7 +14,7 @@
         <li>
             <span class="logo">Travel Planer</span>
             <button onclick=toggleSidebar() id="toggle-btn">
-                <img src="/images/menu.png" alt="Burguer menu">
+                <img src="/images/menu.png" alt="Burger menu">
             </button>
         </li>
         <li>
@@ -37,20 +38,10 @@
             </ul>
         </li>
         <li>
-            <button onclick=toggleSubMenu(this) class="dropdown-btn">
+            <a href="#" class="nav-item" data-section="todo-lists">
                 <img src="/images/todo.png" alt="To do">
                 <span>Todo-Lists</span>
-                <img src="/images/arrow-d.png" alt="more">
-            </button>
-            <ul class="sub-menu">
-                <div>
-                    <li><a href="#">Work</a></li>
-                    <li><a href="#">Private</a></li>
-                    <li><a href="#">Coding</a></li>
-                    <li><a href="#">Gardening</a></li>
-                    <li><a href="#">School</a></li>
-                </div>
-            </ul>
+            </a>
         </li>
         <li>
             <a href="#" class="nav-item" data-section="calendar">

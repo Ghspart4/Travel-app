@@ -1,39 +1,131 @@
-<main>
-    <section id="home" class="section active">
-        <div class="container">
-            <h1>Plan Your Journey With Confidence</h1>
-            <p class="words">Your all-in-one travel companion for seamless trip planning, itinerary management, and unforgettable adventures</p>
-            <a href="../login.ejs">
-                <button class="botton">Start Planning</button>
-            </a>
-        </div>
-        <div class="container">
-            <h4>Smart Itineraries</h4>
-            <p class="words">Create detailed travel plans with our intuitive planning tools. Organize flights, accommodations, and activities in one place.</p>
-        </div>
-        <div class="container">
-            <h4>Todo Lists</h4>
-            <p class="words">Stay organized with customizable checklists for packing, pre-trip preparations, and daily activities during your journey.</p>
-        </div>
-        <div class="container">
-            <h4>Travel Calendar</h4>
-            <p class="words">Visualize your entire trip timeline. Sync events, bookings, and reservations in an easy-to-view calendar format.</p>
-        </div>
-    </section>
-
-    <section id="calendar" class="section">
-        <div class="container">
-            <h2>Calendar</h2>
-            <p>Your calendar will be displayed here.</p>
-        </div>
-    </section>
-  
-    <section id="profile" class="section">
-        <div class="container">
-            <div class="profile-details">
-                <h1>Welcome <%= user.fullName %></h1>
-                <p>Email: <%= user.email %></p>
+    <main>
+        <section id="home" class="section active">
+            <div class="container">
+                <h1>Plan Your Journey With Confidence</h1>
+                <p class="words">Your all-in-one travel companion for seamless trip planning, itinerary management, and unforgettable adventures</p>
+                <a href="../login.ejs">
+                    <button class="botton">Start Planning</button>
+                </a>
             </div>
-        </div>
-    </section>
-</main>
+            <div class="container">
+                <h4>Smart Itineraries</h4>
+                <p class="words">Create detailed travel plans with our intuitive planning tools. Organize flights, accommodations, and activities in one place.</p>
+            </div>
+            <div class="container">
+                <h4>Todo Lists</h4>
+                <p class="words">Stay organized with customizable checklists for packing, pre-trip preparations, and daily activities during your journey.</p>
+            </div>
+            <div class="container">
+                <h4>Travel Calendar</h4>
+                <p class="words">Visualize your entire trip timeline. Sync events, bookings, and reservations in an easy-to-view calendar format.</p>
+            </div>
+        </section>
+
+        <section id="todo-lists" class="section" >
+            <div class="todo-container">
+                <h1 class="todo">Travel Todo List</h1>
+                
+                <div id="alertContainer" class="alert-container"></div>
+        
+                <form id="addTodoForm" class="todo-form">
+                    <div class="form-group">
+                        <label for="task">Task</label>
+                        <input type="text" id="task" name="task" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" required>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="due_date">Due Date</label>
+                        <input type="date" id="due_date" name="due_date" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="priority">Priority</label>
+                        <select id="priority" name="priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+        
+                    <button type="submit" class="btn-submit">Add Todo</button>
+                </form>
+        
+        
+                    
+                
+        
+                <!-- Modal for editing Todo -->
+                <div id="edit-todo-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="modal-close">&times;</span>
+                        <h3>Edit Todo</h3>
+                        <form id="edit-todo-form">
+                            <input type="hidden" id="edit-todo-id">
+                            
+                            <div class="form-group">
+                                <label for="edit-task">Task</label>
+                                <input type="text" id="edit-task" name="task" required>
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="edit-due-date">Due Date</label>
+                                <input type="date" id="edit-due-date" name="due_date" required>
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="edit-priority">Priority</label>
+                                <select id="edit-priority" name="priority" required>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="edit-status">Status</label>
+                                <select id="edit-status" name="status" required>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+        
+                            <div class="form-actions">
+                                <button type="submit" class="btn-submit">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        
+                <div id="todosContainer" class="todos-grid">
+                    <!-- Todos will be dynamically loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="calendar" class="section">
+            <div class="container">
+                <h2>Calendar</h2>
+                <p>Your calendar will be displayed here.</p>
+            </div>
+        </section>
+    
+        <section id="profile" class="section">
+            <div class="container">
+                <div class="profile-details">
+                    <h1>Welcome <%= user.fullName %></h1>
+                    <p>Email: <%= user.email %></p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script type="text/javascript" src="/js/todo.js" defer></script>
