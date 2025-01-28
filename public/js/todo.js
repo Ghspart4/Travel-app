@@ -37,22 +37,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.getElementById('addTodoForm').addEventListener('submit', async (event) => {
     event.preventDefault();
-
+  
     const task = document.getElementById('task').value;
     const status = document.getElementById('status').value;
     const due_date = document.getElementById('due_date').value;
     const priority = document.getElementById('priority').value;
-
-    const user_id = 1; // You may want to replace this with dynamic user ID.
-
+  
     const formData = {
-        user_id,
         task,
         status,
         due_date,
         priority
     };
-
+  
     try {
         const response = await fetch('/addTodo', {
             method: 'POST',
@@ -61,11 +58,11 @@ document.getElementById('addTodoForm').addEventListener('submit', async (event) 
             },
             body: JSON.stringify(formData)
         });
-
-        const result = await response.json(); // Parse the response as JSON
+  
+        const result = await response.json();
         if (response.ok) {
             alert('Todo added successfully!');
-            fetchTodos(); // Re-fetch todos to show the new todo
+            fetchTodos();
         } else {
             alert('Error adding todo: ' + result.error);
         }
@@ -73,7 +70,7 @@ document.getElementById('addTodoForm').addEventListener('submit', async (event) 
         console.error('Error:', error);
         alert('Failed to add todo');
     }
-});
+  });
 
 
 fetchTodos();        
@@ -125,31 +122,30 @@ function renderTodos(todos) {
     });
 }
 
-// Edit Todo functionality
-async function editTodo(todoId) {
+// Edit Todo Route
+app.post('/editTodo/:id', isAuthenticated, async (req, res) => {
+    const { task, status, due_date, priority } = req.body;
+    const todoId = req.params.id;
+    const userId = req.session.userId;
+  
     try {
-        // Fetch the specific todo by ID
-        const response = await fetch(`/getTodo/${todoId}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch todo details');
+        // Verify the todo belongs to the logged-in user
+        const [checkResult] = await pool.execute('SELECT * FROM todos WHERE id = ? AND user_id = ?', [todoId, userId]);
+        
+        if (checkResult.length === 0) {
+            return res.status(403).json({ success: false, error: 'Unauthorized to edit this todo' });
         }
-        const todo = await response.json();
-
-        // Pre-fill the form fields with current todo data
-        document.getElementById('edit-todo-id').value = todo.id;
-        document.getElementById('edit-task').value = todo.task;
-        document.getElementById('edit-due-date').value = todo.due_date;
-        document.getElementById('edit-priority').value = todo.priority;
-        document.getElementById('edit-status').value = todo.status;
-
-        // Show the modal with the edit form
-        document.getElementById('edit-todo-modal').style.display = 'block';
-    } catch (error) {
-        console.error('Error fetching todo details:', error);
-        alert('Failed to fetch todo details');
+  
+        await pool.execute(
+            'UPDATE todos SET task = ?, status = ?, due_date = ?, priority = ? WHERE id = ?',
+            [task, status, due_date, priority, todoId]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error updating todo:', err);
+        res.status(500).json({ success: false, error: 'Failed to update todo' });
     }
-}
-
+  });
 
 
 
@@ -193,28 +189,31 @@ document.getElementById('edit-todo-form').addEventListener('submit', async (even
     }
 });
 
-async function deleteTodo(todoId) {
+// Delete Todo Route
+app.post('/deleteTodo/:id', isAuthenticated, async (req, res) => {
+    const todoId = req.params.id;
+    const userId = req.session.userId;
+  
     try {
-        const response = await fetch(`/deleteTodo/${todoId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const result = await response.json();
-        if (result.success) {
-            alert('Todo deleted successfully!');
-            fetchTodos(); // Re-fetch todos to reflect the deletion
-        } else {
-            alert('Error deleting todo');
+        // Verify the todo belongs to the logged-in user
+        const [checkResult] = await pool.execute('SELECT * FROM todos WHERE id = ? AND user_id = ?', [todoId, userId]);
+        
+        if (checkResult.length === 0) {
+            return res.status(403).json({ success: false, error: 'Unauthorized to delete this todo' });
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to delete todo');
+  
+        const [result] = await pool.execute('DELETE FROM todos WHERE id = ?', [todoId]);
+        if (result.affectedRows > 0) {
+            res.json({ success: true, message: 'Todo deleted successfully' });
+        } else {
+            res.status(404).json({ success: false, error: 'Todo not found' });
+        }
+    } catch (err) {
+        console.error('Error deleting todo:', err);
+        res.status(500).json({ success: false, error: 'Error deleting todo' });
     }
-}
-
+  });
+  
 
      // Update a todo
      async function updateTodo(formData) {

@@ -82,26 +82,25 @@ app.get('/adminOnly', isAuthenticated, isRole('admin'), async (req, res) => {
         res.status(500).send('Error fetching data');
     }
 });
+
 app.get('/premiumOnly', isAuthenticated, isRole('premium'), async (req, res) => {
     try {
-        const userId = req.session.userId; // Assuming session user ID is set during login
+        const userId = req.session.userId;
         
-        // Query the todos table for the logged-in user
+        // Get todos
         const [todoList] = await pool.execute('SELECT * FROM todos WHERE user_id = ?', [userId]);
-
-        const userDetails = {
-            email: req.session.email,
-            name: req.session.name,
-            userId: req.session.userId
-        };
+        
+        // Get trips
+        const [trips] = await pool.execute('SELECT * FROM trips WHERE user_id = ?', [userId]);
 
         res.render('premiumOnly', {
-            user: userDetails,
-            userId: req.session.userId,
-            todoList: todoList // Pass the todo list to the template
+            user: { email: req.session.email },
+            userId,
+            todoList,
+            trips // Pass trips to the template
         });
     } catch (error) {
-        console.error('Error fetching todo list:', error);
+        console.error('Error:', error);
         res.status(500).send('Server error');
     }
 });
@@ -262,9 +261,9 @@ app.post('/auth', async (req, res) => {
 });
 
 // Get all todos
-app.get('/getTodos', async (req, res) => {
+app.get('/getTodos', isAuthenticated, async (req, res) => {
     try {
-        const [rows] = await pool.execute('SELECT * FROM todos WHERE user_id = ? ORDER BY due_date ASC', [1]);
+        const [rows] = await pool.execute('SELECT * FROM todos WHERE user_id = ? ORDER BY due_date ASC', [req.session.userId]);
         res.json(rows);
     } catch (err) {
         console.error('Error fetching todos:', err);
@@ -288,8 +287,9 @@ app.get('/getTodo/:id', async (req, res) => {
 });
 
 // Add new todo
-app.post('/addTodo', async (req, res) => {
-    const { user_id, task, status, due_date, priority } = req.body;
+app.post('/addTodo', isAuthenticated, async (req, res) => {
+    const { task, status, due_date, priority } = req.body;
+    const user_id = req.session.userId;
 
     try {
         const [result] = await pool.execute(
@@ -333,6 +333,83 @@ app.post('/deleteTodo/:id', async (req, res) => {
     } catch (err) {
         console.error('Error deleting todo:', err);
         res.status(500).json({ success: false, error: 'Error deleting todo' });
+    }
+});
+
+
+// Get all trips for the current user
+app.get('/trips', isAuthenticated, async (req, res) => {
+    try {
+        const [trips] = await pool.execute(
+            'SELECT * FROM trips WHERE user_id = ? ORDER BY start_date DESC',
+            [req.session.userId]
+        );
+        res.json(trips);
+    } catch (err) {
+        console.error('Error fetching trips:', err);
+        res.status(500).json({ error: 'Error fetching trips' });
+    }
+});
+
+// Create new trip
+app.post('/trips', isAuthenticated, async (req, res) => {
+    const { name, start_date, end_date } = req.body;
+
+    // Add validation
+    if (!name || !start_date || !end_date) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    try {
+        const [result] = await pool.execute(
+            'INSERT INTO trips (user_id, name, start_date, end_date) VALUES (?, ?, ?, ?)',
+            [req.session.userId, name, start_date, end_date]
+        );
+        res.json({ id: result.insertId });
+    } catch (err) {
+        console.error('Error creating trip:', err);
+        res.status(500).json({ error: 'Error creating trip' });
+    }
+});
+
+// Get single trip with bookings
+app.get('/trips/:id', isAuthenticated, async (req, res) => {
+    try {
+        const [trip] = await pool.execute(
+            'SELECT * FROM trips WHERE id = ? AND user_id = ?',
+            [req.params.id, req.session.userId]
+        );
+        
+        if (trip.length === 0) return res.status(404).send('Trip not found');
+        
+        const [bookings] = await pool.execute(
+            'SELECT * FROM bookings WHERE trip_id = ? ORDER BY datetime ASC',
+            [req.params.id]
+        );
+        
+        res.render('trip', { 
+            trip: trip[0],
+            bookings,
+            user: req.session.userId 
+        });
+    } catch (err) {
+        console.error('Error fetching trip:', err);
+        res.status(500).send('Error fetching trip');
+    }
+});
+
+// Add booking to trip
+app.post('/trips/:id/bookings', isAuthenticated, async (req, res) => {
+    const { type, details, datetime } = req.body;
+    try {
+        await pool.execute(
+            'INSERT INTO bookings (trip_id, type, details, datetime) VALUES (?, ?, ?, ?)',
+            [req.params.id, type, details, datetime]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error adding booking:', err);
+        res.status(500).json({ error: 'Error adding booking' });
     }
 });
 

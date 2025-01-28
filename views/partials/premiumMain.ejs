@@ -112,11 +112,39 @@
             </div>
         </section>
 
-        <section id="calendar" class="section">
+        <section id="create" class="section">
             <div class="container">
-                <h2>Calendar</h2>
-                <p>Your calendar will be displayed here.</p>
-            </div>
+                <h1>Create Your Trip</h1>
+                <p>Plan your next adventure with our easy-to-use trip creation tool. Get started by selecting a trip from the dropdown menu or create a new trip.</p>
+            <ul class="sub-menu">
+                <div>
+                    <li>
+                        <select id="tripSelector" class="trip-selector">
+                            <option value="" disabled selected>Select Trip</option>
+                            <% trips.forEach(trip => { %>
+                                <option value="<%= trip.id %>"><%= trip.name %></option>
+                            <% }); %>
+                        </select>
+                    </li>
+                    <li><button onclick="navigateToTrip()">Go to Trip</button></li>
+                    <form id="tripForm">
+                        <div class="form-group">
+                            <label for="tripName">Trip Name:</label>
+                            <input type="text" id="tripName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="startDate">Start Date:</label>
+                            <input type="date" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date:</label>
+                            <input type="date" id="endDate" required>
+                        </div>
+                        <button type="submit">Create Trip</button>
+                    </form>
+                </div>
+            </ul>
+        </li>
         </section>
     
         <section id="profile" class="section">
@@ -128,4 +156,39 @@
             </div>
         </section>
     </main>
-    <script type="text/javascript" src="/js/todo.js" defer></script>
+    <script type="text/javascript" src="/js/todo.js" defer>
+        document.getElementById('tripForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const tripData = {
+        name: document.getElementById('tripName').value.trim(),
+        start_date: document.getElementById('startDate').value,
+        end_date: document.getElementById('endDate').value
+    };
+
+    // Client-side validation
+    if (!tripData.name || !tripData.start_date || !tripData.end_date) {
+        alert('Please fill all required fields');
+        return;
+    }
+
+    try {
+        const response = await fetch('/trips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tripData)
+        });
+
+        if (response.ok) {
+            window.location.reload();
+            closeTripModal();
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to create trip');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Network error');
+    }
+});
+    </script>

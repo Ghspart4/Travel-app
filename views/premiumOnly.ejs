@@ -24,19 +24,11 @@
             </a>
         </li>
         <li>
-            <button onclick=toggleSubMenu(this) class="dropdown-btn">
+            <button onclick="toggleSubMenu(this)" class="dropdown-btn nav-item" data-section="create">
                 <img src="/images/plane.png" alt="">
                 <span>Create</span>
                 <img src="/images/arrow-d.png" alt="more">
             </button>
-            <ul class="sub-menu">
-                <div>
-                    <li><a href="#">Folder</a></li>
-                    <li><a href="#">Document</a></li>
-                    <li><a href="#">Project</a></li>
-                </div>
-            </ul>
-        </li>
         <li>
             <a href="#" class="nav-item" data-section="todo-lists">
                 <img src="/images/todo.png" alt="To do">
@@ -59,4 +51,63 @@
 </nav>
 <%- include('partials/premiumMain.ejs') %>
 </body>
+<script>
+    function showNewTripForm() {
+    document.getElementById('tripModal').style.display = 'block';
+}
+
+function closeTripModal() {
+    document.getElementById('tripModal').style.display = 'none';
+}
+
+document.getElementById('tripForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const tripData = {
+        name: document.getElementById('tripName').value,
+        start_date: document.getElementById('startDate').value,
+        end_date: document.getElementById('endDate').value
+    };
+
+    try {
+        const response = await fetch('/trips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tripData)
+        });
+
+        if (response.ok) {
+            window.location.reload();
+            closeTripModal();
+        } else {
+            console.error('Failed to create trip');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+
+
+
+    function navigateToTrip() {
+    const tripId = document.getElementById('tripSelector').value;
+    if (tripId) window.location.href = `/trips/${tripId}`;
+}
+
+function showNewTripForm() {
+    const name = prompt('Enter trip name:');
+    if (name) {
+        fetch('/trips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        })
+        .then(response => response.json())
+        .then(data => {
+            window.location.reload(); // Refresh to show new trip in dropdown
+        });
+    }
+}
+</script>
 </html>

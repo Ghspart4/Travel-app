@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= trip.name %></title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+   
+    
+    <main>
+        <section class="active">
+            <div class="container">
+                <h1><%= trip.name %></h1>
+                <p>
+                    <%= trip.start_date ? new Date(trip.start_date).toLocaleDateString() : 'No start date' %> - 
+                    <%= trip.end_date ? new Date(trip.end_date).toLocaleDateString() : 'No end date' %>
+                </p>
+                
+                <div class="booking-form">
+                    <h3>Add Booking</h3>
+                    <form id="bookingForm">
+                        <select name="type" required>
+                            <option value="flight">Flight</option>
+                            <option value="accommodation">Accommodation</option>
+                            <option value="car-rental">Car Rental</option>
+                            <option value="activity">Activity</option>
+                            <option value="other">Other</option>
+                        </select>
+                        
+                        <input type="datetime-local" name="datetime" required>
+                        <textarea name="details" placeholder="Booking details"></textarea>
+                        <button type="submit">Add Booking</button>
+                    </form>
+                </div>
+
+                <div class="bookings-list">
+                    <% bookings.forEach(booking => { %>
+                        <div class="todo-card" data-type="<%= booking.type %>">
+                            <h3><%= booking.type.toUpperCase() %></h3>
+                            <p class="todostatus">
+                                <%= new Date(booking.datetime).toLocaleString() %>
+                            </p>
+                            <p class="todotask"><%= booking.details %></p>
+                            <p>Status: <%= booking.status %></p>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch(`/trips/<%= trip.id %>/bookings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+    </script>
+</body>
+</html>
