@@ -37,19 +37,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.getElementById('addTodoForm').addEventListener('submit', async (event) => {
     event.preventDefault();
-  
+
     const task = document.getElementById('task').value;
     const status = document.getElementById('status').value;
     const due_date = document.getElementById('due_date').value;
     const priority = document.getElementById('priority').value;
-  
+    
+    const user_id = 1; // You may want to replace this with dynamic user ID.
+
     const formData = {
+        user_id,
         task,
         status,
         due_date,
         priority
     };
-  
+
     try {
         const response = await fetch('/addTodo', {
             method: 'POST',
@@ -58,11 +61,11 @@ document.getElementById('addTodoForm').addEventListener('submit', async (event) 
             },
             body: JSON.stringify(formData)
         });
-  
-        const result = await response.json();
+
+        const result = await response.json(); // Parse the response as JSON
         if (response.ok) {
             alert('Todo added successfully!');
-            fetchTodos();
+            fetchTodos(); // Re-fetch todos to show the new todo
         } else {
             alert('Error adding todo: ' + result.error);
         }
@@ -70,7 +73,7 @@ document.getElementById('addTodoForm').addEventListener('submit', async (event) 
         console.error('Error:', error);
         alert('Failed to add todo');
     }
-  });
+});
 
 
 fetchTodos();        
@@ -122,30 +125,31 @@ function renderTodos(todos) {
     });
 }
 
-// Edit Todo Route
-app.post('/editTodo/:id', isAuthenticated, async (req, res) => {
-    const { task, status, due_date, priority } = req.body;
-    const todoId = req.params.id;
-    const userId = req.session.userId;
-  
+// Edit Todo functionality
+async function editTodo(todoId) {
     try {
-        // Verify the todo belongs to the logged-in user
-        const [checkResult] = await pool.execute('SELECT * FROM todos WHERE id = ? AND user_id = ?', [todoId, userId]);
-        
-        if (checkResult.length === 0) {
-            return res.status(403).json({ success: false, error: 'Unauthorized to edit this todo' });
+        // Fetch the specific todo by ID
+        const response = await fetch(`/getTodo/${todoId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch todo details');
         }
-  
-        await pool.execute(
-            'UPDATE todos SET task = ?, status = ?, due_date = ?, priority = ? WHERE id = ?',
-            [task, status, due_date, priority, todoId]
-        );
-        res.json({ success: true });
-    } catch (err) {
-        console.error('Error updating todo:', err);
-        res.status(500).json({ success: false, error: 'Failed to update todo' });
+        const todo = await response.json();
+
+        // Pre-fill the form fields with current todo data
+        document.getElementById('edit-todo-id').value = todo.id;
+        document.getElementById('edit-task').value = todo.task;
+        document.getElementById('edit-due-date').value = todo.due_date;
+        document.getElementById('edit-priority').value = todo.priority;
+        document.getElementById('edit-status').value = todo.status;
+
+        // Show the modal with the edit form
+        document.getElementById('edit-todo-modal').style.display = 'block';
+    } catch (error) {
+        console.error('Error fetching todo details:', error);
+        alert('Failed to fetch todo details');
     }
-  });
+}
+
 
 
 
@@ -189,31 +193,28 @@ document.getElementById('edit-todo-form').addEventListener('submit', async (even
     }
 });
 
-// Delete Todo Route
-app.post('/deleteTodo/:id', isAuthenticated, async (req, res) => {
-    const todoId = req.params.id;
-    const userId = req.session.userId;
-  
+async function deleteTodo(todoId) {
     try {
-        // Verify the todo belongs to the logged-in user
-        const [checkResult] = await pool.execute('SELECT * FROM todos WHERE id = ? AND user_id = ?', [todoId, userId]);
-        
-        if (checkResult.length === 0) {
-            return res.status(403).json({ success: false, error: 'Unauthorized to delete this todo' });
-        }
-  
-        const [result] = await pool.execute('DELETE FROM todos WHERE id = ?', [todoId]);
-        if (result.affectedRows > 0) {
-            res.json({ success: true, message: 'Todo deleted successfully' });
+        const response = await fetch(`/deleteTodo/${todoId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Todo deleted successfully!');
+            fetchTodos(); // Re-fetch todos to reflect the deletion
         } else {
-            res.status(404).json({ success: false, error: 'Todo not found' });
+            alert('Error deleting todo');
         }
-    } catch (err) {
-        console.error('Error deleting todo:', err);
-        res.status(500).json({ success: false, error: 'Error deleting todo' });
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete todo');
     }
-  });
-  
+}
+
 
      // Update a todo
      async function updateTodo(formData) {
@@ -256,65 +257,3 @@ document.querySelector('.modal-close').addEventListener('click', () => {
     document.getElementById('edit-todo-modal').style.display = 'none';
 });
 
-
-
-let currentTripId = null;
-
-// Open Edit Trip Modal
-function openEditTripModal(tripId) {
-    fetch(`/trips/${tripId}`)
-        .then(response => response.json())
-        .then(trip => {
-            document.getElementById('editTripId').value = trip.id;
-            document.getElementById('editTripName').value = trip.name;
-            document.getElementById('editStartDate').value = trip.start_date;
-            document.getElementById('editEndDate').value = trip.end_date;
-            document.getElementById('editTripModal').style.display = 'block';
-        });
-}
-
-// Submit Edit Trip Form
-document.getElementById('editTripForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const tripData = {
-        name: document.getElementById('editTripName').value,
-        start_date: document.getElementById('editStartDate').value,
-        end_date: document.getElementById('editEndDate').value
-    };
-
-    try {
-        const response = await fetch(`/trips/${document.getElementById('editTripId').value}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(tripData)
-        });
-
-        if (response.ok) {
-            window.location.reload();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-});
-
-// Open Delete Trip Modal
-function openDeleteTripModal(tripId) {
-    currentTripId = tripId;
-    document.getElementById('deleteTripModal').style.display = 'block';
-}
-
-// Confirm Delete Trip
-function confirmDeleteTrip() {
-    fetch(`/trips/${currentTripId}`, { method: 'DELETE' })
-        .then(response => {
-            if (response.ok) {
-                window.location.reload();
-            }
-        });
-}
-
-// Close Modal
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}

@@ -336,6 +336,50 @@ app.post('/deleteTodo/:id', async (req, res) => {
     }
 });
 
+// API endpoint for JSON response
+app.get('/api/trips/:id', async (req, res) => {
+    const tripId = req.params.id;
+    
+    try {
+        const [trip] = await pool.execute(
+            "SELECT * FROM trips WHERE id = ?", 
+            [tripId]
+        );
+        
+        if (trip.length === 0) {
+            return res.status(404).json({ error: "Trip not found" });
+        }
+        
+        res.json(trip[0]);
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Web route for rendered view
+app.get('/trips/:id', isAuthenticated, async (req, res) => {
+    try {
+        const [trip] = await pool.execute(
+            'SELECT * FROM trips WHERE id = ?',
+            [req.params.id]
+        );
+        
+        if (trip.length === 0) {
+            return res.status(404).send('Trip not found');
+        }
+        
+        const [bookings] = await pool.execute(
+            'SELECT * FROM bookings WHERE trip_id = ?',
+            [req.params.id]
+        );
+        
+        res.render('trip', { trip: trip[0], bookings });
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Server error');
+    }
+});
 
 // Get all trips for the current user
 app.get('/trips', isAuthenticated, async (req, res) => {

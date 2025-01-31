@@ -216,16 +216,31 @@
 
 let currentTripId = null;
 
-// Open Edit Trip Modal
 function openEditTripModal(tripId) {
-    fetch(`/trips/${tripId}`)
-        .then(response => response.json())
+    console.log(`Opening edit modal for trip ID: ${tripId}`);
+
+    fetch(`/api/trips/${tripId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(trip => {
+            console.log('Trip data:', trip);
+
+            // Populate the modal fields with the trip data
             document.getElementById('editTripId').value = trip.id;
             document.getElementById('editTripName').value = trip.name;
             document.getElementById('editStartDate').value = trip.start_date;
             document.getElementById('editEndDate').value = trip.end_date;
+
+            // Display the modal
             document.getElementById('editTripModal').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error fetching trip data:', error);
+            alert('Failed to fetch trip data. Please try again.');
         });
 }
 
@@ -254,6 +269,8 @@ document.getElementById('editTripForm').addEventListener('submit', async (e) => 
     }
 });
 
+
+
 // Open Delete Trip Modal
 function openDeleteTripModal(tripId) {
     currentTripId = tripId;
@@ -273,7 +290,8 @@ function confirmDeleteTrip() {
 // Close Modal
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
-}
+}isplay = 'none';
+
     </script>
     <script type="text/javascript" src="/js/todo.js" defer></script>
     <script type="text/javascript" src="/js/trip.js" defer></script>

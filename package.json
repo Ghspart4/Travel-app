@@ -1,27 +1,12 @@
 {
   "name": "travel-app",
   "version": "1.0.0",
-  "description": "My first node js &amp; express project",
-  "main": "app.js",
+  "description": "My travel planning app",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.20.3",
-    "dotenv": "^16.4.7",
-    "ejs": "^3.1.10",
-    "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.12.0",
-    "node": "^23.4.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.7"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

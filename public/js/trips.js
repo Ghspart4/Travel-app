@@ -91,6 +91,15 @@ document.getElementById('editTripForm').addEventListener('submit', async (e) => 
     }
 });
 
+function navigateToTrip() {
+    const tripSelector = document.getElementById('tripSelector');
+    if (!tripSelector.value) {
+        alert('Please select a trip');
+        return;
+    }
+    window.location.href = '/trips/' + tripSelector.value;
+}
+
 function openDeleteTripModal(tripId) {
     currentTripId = tripId;
     document.getElementById('deleteTripModal').style.display = 'block';
