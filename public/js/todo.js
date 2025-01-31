@@ -256,3 +256,65 @@ document.querySelector('.modal-close').addEventListener('click', () => {
     document.getElementById('edit-todo-modal').style.display = 'none';
 });
 
+
+
+let currentTripId = null;
+
+// Open Edit Trip Modal
+function openEditTripModal(tripId) {
+    fetch(`/trips/${tripId}`)
+        .then(response => response.json())
+        .then(trip => {
+            document.getElementById('editTripId').value = trip.id;
+            document.getElementById('editTripName').value = trip.name;
+            document.getElementById('editStartDate').value = trip.start_date;
+            document.getElementById('editEndDate').value = trip.end_date;
+            document.getElementById('editTripModal').style.display = 'block';
+        });
+}
+
+// Submit Edit Trip Form
+document.getElementById('editTripForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const tripData = {
+        name: document.getElementById('editTripName').value,
+        start_date: document.getElementById('editStartDate').value,
+        end_date: document.getElementById('editEndDate').value
+    };
+
+    try {
+        const response = await fetch(`/trips/${document.getElementById('editTripId').value}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tripData)
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+// Open Delete Trip Modal
+function openDeleteTripModal(tripId) {
+    currentTripId = tripId;
+    document.getElementById('deleteTripModal').style.display = 'block';
+}
+
+// Confirm Delete Trip
+function confirmDeleteTrip() {
+    fetch(`/trips/${currentTripId}`, { method: 'DELETE' })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+}
+
+// Close Modal
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}

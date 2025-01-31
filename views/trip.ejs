@@ -2,7 +2,7 @@
 <html>
 <head>
     <title><%= trip.name %></title>
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/trip.css">
 </head>
 <body>
    
@@ -19,16 +19,19 @@
                 <div class="booking-form">
                     <h3>Add Booking</h3>
                     <form id="bookingForm">
-                        <select name="type" required>
-                            <option value="flight">Flight</option>
-                            <option value="accommodation">Accommodation</option>
-                            <option value="car-rental">Car Rental</option>
-                            <option value="activity">Activity</option>
-                            <option value="other">Other</option>
-                        </select>
-                        
-                        <input type="datetime-local" name="datetime" required>
-                        <textarea name="details" placeholder="Booking details"></textarea>
+                        <div class="form-row">
+                            <select name="type" required>
+                                <option value="flight">Flight</option>
+                                <option value="accommodation">Accommodation</option>
+                                <option value="car-rental">Car Rental</option>
+                                <option value="activity">Activity</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <input type="datetime-local" name="datetime" required>
+                        </div>
+                        <div class="textarea-container">
+                            <textarea name="details" placeholder="Booking details" id="booking1"></textarea>
+                        </div>
                         <button type="submit">Add Booking</button>
                     </form>
                 </div>
@@ -41,9 +44,45 @@
                                 <%= new Date(booking.datetime).toLocaleString() %>
                             </p>
                             <p class="todotask"><%= booking.details %></p>
-                            <p>Status: <%= booking.status %></p>
+                            <!-- Add Edit and Delete buttons -->
+                            <div class="booking-actions">
+                                <button onclick="openEditBookingModal(<%= booking.id %>, '<%= booking.type %>', '<%= booking.details %>', '<%= booking.datetime %>')">Edit</button>
+                                <button onclick="openDeleteBookingModal(<%= booking.id %>)">Delete</button>
+                            </div>
                         </div>
                     <% }); %>
+                </div>
+                <!-- Edit Booking Modal -->
+                <div id="editBookingModal" class="modal-edit">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeModal('editBookingModal')">&times;</span>
+                        <h2>Edit Booking</h2>
+                        <form id="editBookingForm">
+                            <input type="hidden" id="editBookingId">
+                            <div class="form-row-inline">
+                                <select id="editBookingType" name="type" required>
+                                    <option value="flight">Flight</option>
+                                    <option value="accommodation">Accommodation</option>
+                                    <option value="car-rental">Car Rental</option>
+                                    <option value="activity">Activity</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <input type="datetime-local" id="editBookingDatetime" name="datetime" required>
+                            </div>
+                            <textarea id="editBookingDetails" name="details" placeholder="Booking details" class="booking"></textarea>
+                            <button type="submit">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Delete Booking Modal -->
+                <div id="deleteBookingModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeModal('deleteBookingModal')">&times;</span>
+                        <h2>Delete Booking</h2>
+                        <p>Are you sure you want to delete this booking?</p>
+                        <button onclick="confirmDeleteBooking()">Delete</button>
+                        <button onclick="closeModal('deleteBookingModal')">Cancel</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -68,6 +107,72 @@
             console.error('Error:', error);
         }
     });
+
+    let currentBookingId = null;
+
+    // Open Edit Booking Modal
+    function openEditBookingModal(bookingId, type, details, datetime) {
+        document.getElementById('editBookingId').value = bookingId;
+        document.getElementById('editBookingType').value = type;
+        document.getElementById('editBookingDetails').value = details;
+        document.getElementById('editBookingDatetime').value = datetime;
+        document.getElementById('editBookingModal').style.display = 'block';
+    }
+
+    // Submit Edit Booking Form
+    document.getElementById('editBookingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const bookingData = {
+            type: document.getElementById('editBookingType').value,
+            details: document.getElementById('editBookingDetails').value,
+            datetime: document.getElementById('editBookingDatetime').value
+        };
+
+        try {
+            const response = await fetch(`/bookings/${document.getElementById('editBookingId').value}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+
+    // Open Delete Booking Modal
+    function openDeleteBookingModal(bookingId) {
+        currentBookingId = bookingId;
+        document.getElementById('deleteBookingModal').style.display = 'block';
+    }
+
+    // Confirm Delete Booking
+    function confirmDeleteBooking() {
+        fetch(`/bookings/${currentBookingId}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+    }
+
+    function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Close modal when clicking outside the modal content
+window.onclick = function (event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+};
     </script>
 </body>
 </html>

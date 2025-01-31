@@ -354,12 +354,6 @@ app.get('/trips', isAuthenticated, async (req, res) => {
 // Create new trip
 app.post('/trips', isAuthenticated, async (req, res) => {
     const { name, start_date, end_date } = req.body;
-
-    // Add validation
-    if (!name || !start_date || !end_date) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
-
     try {
         const [result] = await pool.execute(
             'INSERT INTO trips (user_id, name, start_date, end_date) VALUES (?, ?, ?, ?)',
@@ -369,6 +363,32 @@ app.post('/trips', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.error('Error creating trip:', err);
         res.status(500).json({ error: 'Error creating trip' });
+    }
+});
+
+// Edit Booking
+app.put('/bookings/:id', isAuthenticated, async (req, res) => {
+    const { type, details, datetime } = req.body;
+    try {
+        await pool.execute(
+            'UPDATE bookings SET type = ?, details = ?, datetime = ? WHERE id = ?',
+            [type, details, datetime, req.params.id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error updating booking:', err);
+        res.status(500).json({ error: 'Error updating booking' });
+    }
+});
+
+// Delete Booking
+app.delete('/bookings/:id', isAuthenticated, async (req, res) => {
+    try {
+        await pool.execute('DELETE FROM bookings WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting booking:', err);
+        res.status(500).json({ error: 'Error deleting booking' });
     }
 });
 
@@ -398,6 +418,32 @@ app.get('/trips/:id', isAuthenticated, async (req, res) => {
     }
 });
 
+// Edit Trip
+app.put('/trips/:id', isAuthenticated, async (req, res) => {
+    const { name, start_date, end_date } = req.body;
+    try {
+        await pool.execute(
+            'UPDATE trips SET name = ?, start_date = ?, end_date = ? WHERE id = ? AND user_id = ?',
+            [name, start_date, end_date, req.params.id, req.session.userId]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error updating trip:', err);
+        res.status(500).json({ error: 'Error updating trip' });
+    }
+});
+
+// Delete Trip
+app.delete('/trips/:id', isAuthenticated, async (req, res) => {
+    try {
+        await pool.execute('DELETE FROM trips WHERE id = ? AND user_id = ?', [req.params.id, req.session.userId]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting trip:', err);
+        res.status(500).json({ error: 'Error deleting trip' });
+    }
+});
+
 // Add booking to trip
 app.post('/trips/:id/bookings', isAuthenticated, async (req, res) => {
     const { type, details, datetime } = req.body;
@@ -412,7 +458,6 @@ app.post('/trips/:id/bookings', isAuthenticated, async (req, res) => {
         res.status(500).json({ error: 'Error adding booking' });
     }
 });
-
 
 
 // Logout Route

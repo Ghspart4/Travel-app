@@ -116,36 +116,92 @@
             <div class="container">
                 <h1>Create Your Trip</h1>
                 <p>Plan your next adventure with our easy-to-use trip creation tool. Get started by selecting a trip from the dropdown menu or create a new trip.</p>
-            <ul class="sub-menu">
-                <div>
-                    <li>
-                        <select id="tripSelector" class="trip-selector">
-                            <option value="" disabled selected>Select Trip</option>
-                            <% trips.forEach(trip => { %>
-                                <option value="<%= trip.id %>"><%= trip.name %></option>
-                            <% }); %>
-                        </select>
-                    </li>
-                    <li><button onclick="navigateToTrip()">Go to Trip</button></li>
-                    <form id="tripForm">
+                <ul class="sub-menu">
+                    <div>
+                        <li>
+                            <select id="tripSelector" class="trip-selector">
+                                <option value="" disabled selected>Select Trip</option>
+                                <% trips.forEach(trip => { %>
+                                    <option value="<%= trip.id %>"><%= trip.name %></option>
+                                <% }); %>
+                            </select>
+                        </li>
+                        <li><button onclick="navigateToTrip()">Go to Trip</button></li>
+                        <form id="tripForm">
+                            <div class="form-group">
+                                <label for="tripName">Trip Name:</label>
+                                <input type="text" id="tripName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="startDate">Start Date:</label>
+                                <input type="date" id="startDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="endDate">End Date:</label>
+                                <input type="date" id="endDate" required>
+                            </div>
+                            <button type="submit">Create Trip</button>
+                        </form>
+                    </div>
+                </ul>
+            </div>
+            <!-- Display Trips with Edit and Delete Buttons -->
+            <div id="trips">
+                <div class="container">
+                    <h2>Your Trips</h2>
+                    <ul class="trip-list">
+                        <% trips.forEach(trip => { %>
+                            <li class="trip-item">
+                                <h3><%= trip.name %></h3>
+                                <p>
+                                    <%= trip.start_date ? new Date(trip.start_date).toLocaleDateString() : 'No start date' %> - 
+                                    <%= trip.end_date ? new Date(trip.end_date).toLocaleDateString() : 'No end date' %>
+                                </p>
+                                <div class="trip-actions">
+                                    <button onclick="openEditTripModal(<%= trip.id %>)">Edit</button>
+                                    <button onclick="openDeleteTripModal(<%= trip.id %>)">Delete</button>
+                                </div>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
+            </div>
+            <!-- Edit Trip Modal -->
+            <div id="editTripModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal('editTripModal')">&times;</span>
+                    <h2>Edit Trip</h2>
+                    <form id="editTripForm">
+                        <input type="hidden" id="editTripId">
                         <div class="form-group">
-                            <label for="tripName">Trip Name:</label>
-                            <input type="text" id="tripName" required>
+                            <label for="editTripName">Trip Name:</label>
+                            <input type="text" id="editTripName" required>
                         </div>
                         <div class="form-group">
-                            <label for="startDate">Start Date:</label>
-                            <input type="date" id="startDate" required>
+                            <label for="editStartDate">Start Date:</label>
+                            <input type="date" id="editStartDate" required>
                         </div>
                         <div class="form-group">
-                            <label for="endDate">End Date:</label>
-                            <input type="date" id="endDate" required>
+                            <label for="editEndDate">End Date:</label>
+                            <input type="date" id="editEndDate" required>
                         </div>
-                        <button type="submit">Create Trip</button>
+                        <button type="submit">Save Changes</button>
                     </form>
                 </div>
-            </ul>
-        </li>
+            </div>
+            
+            <!-- Delete Trip Modal -->
+            <div id="deleteTripModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal('deleteTripModal')">&times;</span>
+                    <h2>Delete Trip</h2>
+                    <p>Are you sure you want to delete this trip?</p>
+                    <button onclick="confirmDeleteTrip()">Delete</button>
+                    <button onclick="closeModal('deleteTripModal')">Cancel</button>
+                </div>
+            </div>
         </section>
+        
     
         <section id="profile" class="section">
             <div class="container">
@@ -156,39 +212,68 @@
             </div>
         </section>
     </main>
-    <script type="text/javascript" src="/js/todo.js" defer>
-        document.getElementById('tripForm').addEventListener('submit', async (e) => {
+    <script>
+
+let currentTripId = null;
+
+// Open Edit Trip Modal
+function openEditTripModal(tripId) {
+    fetch(`/trips/${tripId}`)
+        .then(response => response.json())
+        .then(trip => {
+            document.getElementById('editTripId').value = trip.id;
+            document.getElementById('editTripName').value = trip.name;
+            document.getElementById('editStartDate').value = trip.start_date;
+            document.getElementById('editEndDate').value = trip.end_date;
+            document.getElementById('editTripModal').style.display = 'block';
+        });
+}
+
+// Submit Edit Trip Form
+document.getElementById('editTripForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const tripData = {
-        name: document.getElementById('tripName').value.trim(),
-        start_date: document.getElementById('startDate').value,
-        end_date: document.getElementById('endDate').value
+        name: document.getElementById('editTripName').value,
+        start_date: document.getElementById('editStartDate').value,
+        end_date: document.getElementById('editEndDate').value
     };
 
-    // Client-side validation
-    if (!tripData.name || !tripData.start_date || !tripData.end_date) {
-        alert('Please fill all required fields');
-        return;
-    }
-
     try {
-        const response = await fetch('/trips', {
-            method: 'POST',
+        const response = await fetch(`/trips/${document.getElementById('editTripId').value}`, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tripData)
         });
 
         if (response.ok) {
             window.location.reload();
-            closeTripModal();
-        } else {
-            const error = await response.json();
-            alert(error.error || 'Failed to create trip');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Network error');
     }
 });
+
+// Open Delete Trip Modal
+function openDeleteTripModal(tripId) {
+    currentTripId = tripId;
+    document.getElementById('deleteTripModal').style.display = 'block';
+}
+
+// Confirm Delete Trip
+function confirmDeleteTrip() {
+    fetch(`/trips/${currentTripId}`, { method: 'DELETE' })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+}
+
+// Close Modal
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
     </script>
+    <script type="text/javascript" src="/js/todo.js" defer></script>
+    <script type="text/javascript" src="/js/trip.js" defer></script>
