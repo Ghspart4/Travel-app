@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 05, 2025 at 08:07 AM
+-- Generation Time: Jan 31, 2025 at 06:29 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -16,138 +16,58 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
-/*!40101 SET CHARACTER SET utf8mb4 */;
-
-CREATE TABLE `todos` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `user_id` INT(11) NOT NULL, 
-  `task` VARCHAR(255) NOT NULL,
-  `status` ENUM('Pending', 'In Progress', 'Completed') NOT NULL DEFAULT 'Pending',
-  `due_date` DATE DEFAULT NULL,
-  `priority` ENUM('Low', 'Medium', 'High') DEFAULT 'Medium',
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
----------------
 
 --
--- Table structure for table `accommodations`
+-- Database: `travel`
 --
-
-CREATE TABLE `accommodations` (
-  `id` int(11) NOT NULL,
-  `itinerary_id` int(11) NOT NULL,
-  `hotel_name` varchar(100) DEFAULT NULL,
-  `check_in_date` date DEFAULT NULL,
-  `check_out_date` date DEFAULT NULL,
-  `room_type` enum('Single','Double','Suite') NOT NULL,
-  `cost` decimal(10,2) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `activities`
+-- Table structure for table `bookings`
 --
 
-CREATE TABLE `activities` (
-  `id` int(11) NOT NULL,
-  `itinerary_id` int(11) NOT NULL,
-  `activity_name` varchar(100) NOT NULL,
-  `location` varchar(200) DEFAULT NULL,
-  `time` time DEFAULT NULL,
-  `cost` decimal(10,2) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cars`
---
-
-CREATE TABLE `cars` (
-  `id` int(11) NOT NULL,
-  `itinerary_id` int(11) NOT NULL,
-  `booking_id` varchar(100) DEFAULT NULL,
-  `rego` varchar(50) DEFAULT NULL,
-  `pickup_location` varchar(200) DEFAULT NULL,
-  `dropoff_location` varchar(200) DEFAULT NULL,
-  `pickup_time` datetime DEFAULT NULL,
-  `dropoff_time` datetime DEFAULT NULL,
-  `cost` decimal(10,2) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `costs`
---
-
-CREATE TABLE `costs` (
-  `id` int(11) NOT NULL,
-  `entity_id` int(11) NOT NULL,
-  `entity_type` enum('Flight','Car','Accommodation','Activity','Other') NOT NULL,
-  `cost` decimal(10,2) NOT NULL,
-  `currency` varchar(10) DEFAULT 'USD',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `flights`
---
-
-CREATE TABLE `flights` (
-  `id` int(11) NOT NULL,
-  `itinerary_id` int(11) NOT NULL,
-  `airline` enum('Delta','American Airlines','United','Jet Airways','Other') NOT NULL,
-  `flight_number` varchar(50) DEFAULT NULL,
-  `departure_time` datetime DEFAULT NULL,
-  `arrival_time` datetime DEFAULT NULL,
-  `layovers` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`layovers`)),
-  `cost` decimal(10,2) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `itineraries`
---
-
-CREATE TABLE `itineraries` (
+CREATE TABLE `bookings` (
   `id` int(11) NOT NULL,
   `trip_id` int(11) NOT NULL,
-  `itinerary_name` varchar(100) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `type` enum('flight','accommodation','car-rental','activity','other') NOT NULL,
+  `details` text DEFAULT NULL,
+  `datetime` datetime NOT NULL,
+  `status` varchar(50) DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bookings`
+--
+
+INSERT INTO `bookings` (`id`, `trip_id`, `type`, `details`, `datetime`, `status`, `created_at`) VALUES
+(15, 9, 'flight', 'Christchurch', '2025-01-31 15:05:00', 'pending', '2025-01-29 02:05:20');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `others`
+-- Table structure for table `todos`
 --
 
-CREATE TABLE `others` (
+CREATE TABLE `todos` (
   `id` int(11) NOT NULL,
-  `itinerary_id` int(11) NOT NULL,
-  `description` text DEFAULT NULL,
-  `cost` decimal(10,2) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `task` varchar(255) NOT NULL,
+  `status` enum('Pending','In Progress','Completed') NOT NULL DEFAULT 'Pending',
+  `due_date` date DEFAULT NULL,
+  `priority` enum('Low','Medium','High') DEFAULT 'Medium',
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `todos`
+--
+
+INSERT INTO `todos` (`id`, `user_id`, `task`, `status`, `due_date`, `priority`, `created_at`, `updated_at`) VALUES
+(2, 2, 'carlos', 'In Progress', '2025-01-31', 'High', '2025-01-26 15:06:57', '2025-01-26 15:06:57'),
+(3, 2, 'Hola', 'Completed', '2025-01-31', 'Low', '2025-01-29 14:22:23', '2025-01-29 14:22:23');
 
 -- --------------------------------------------------------
 
@@ -158,10 +78,20 @@ CREATE TABLE `others` (
 CREATE TABLE `trips` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `trip_name` varchar(100) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `name` varchar(255) NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `trips`
+--
+
+INSERT INTO `trips` (`id`, `user_id`, `name`, `start_date`, `end_date`, `created_at`) VALUES
+(9, 2, 'Bali', '2025-02-06', '2025-02-14', '2025-01-28 06:09:50'),
+(10, 2, 'Carlos', '2025-01-31', '2025-01-31', '2025-01-28 06:48:21'),
+(11, 2, 'Thailand', '2025-01-31', '2025-01-31', '2025-01-28 06:49:49');
 
 -- --------------------------------------------------------
 
@@ -176,71 +106,38 @@ CREATE TABLE `users` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `contactNumber` int(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `role`, `fullname`, `email`, `password`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'Carlos Martinez', 'carlos.martinez@outlook.co.nz', '$2b$10$dbF2ktnnwwrTmzuMCG7DKesc8Ju.K.QIu7M1gJxBb8fXJti3wps0e', '2025-01-02 11:15:55', '2025-01-05 08:50:47'),
-(2, 'premium', 'Lorena Alvarado', 'loresblock@gmail.com', '$2b$10$Eb/NOP1308Xm6lMMV2DVjOtqUiGi26ni3HtrhJeRnk5/CSSKywbwm', '2025-01-02 11:55:25', '2025-01-05 08:50:58'),
-(4, 'admin', 'Chika', 'chika@gmail.com', '$2b$10$Kq9u.yzR1Ln7iE09/W.YWu7BXZkaDXQL6kUOyIPggoLs6Imm35dfS', '2025-01-03 10:23:21', '2025-01-03 10:23:21'),
-(5, 'customer', 'Jayden', 'jayden@gmail.com', '$2b$10$n1tj1oulx5tPsN.VKvF4MeWD/wY4TgVsHlGCwKeF/roMEsDnPDO0y', '2025-01-05 08:30:23', '2025-01-05 08:42:20');
+INSERT INTO `users` (`id`, `role`, `fullname`, `email`, `password`, `created_at`, `updated_at`, `contactNumber`) VALUES
+(1, 'admin', 'Carlos Martinez', 'carlos.martinez@outlook.co.nz', '$2b$10$dbF2ktnnwwrTmzuMCG7DKesc8Ju.K.QIu7M1gJxBb8fXJti3wps0e', '2025-01-02 11:15:55', '2025-01-05 08:50:47', 0),
+(2, 'premium', 'Lorena Alvarado', 'loresblock@gmail.com', '$2b$10$Eb/NOP1308Xm6lMMV2DVjOtqUiGi26ni3HtrhJeRnk5/CSSKywbwm', '2025-01-02 11:55:25', '2025-01-05 08:50:58', 0),
+(4, 'premium', 'Chika', 'chika@gmail.com', '$2b$10$Kq9u.yzR1Ln7iE09/W.YWu7BXZkaDXQL6kUOyIPggoLs6Imm35dfS', '2025-01-03 10:23:21', '2025-01-26 14:59:15', 0),
+(5, 'customer', 'Jayden', 'jayden@gmail.com', '$2b$10$n1tj1oulx5tPsN.VKvF4MeWD/wY4TgVsHlGCwKeF/roMEsDnPDO0y', '2025-01-05 08:30:23', '2025-01-05 08:42:20', 0),
+(6, 'customer', 'Zyler Martinez', 'zyler@gmail.com', '$2b$10$MvFpfbKR.HjWVMRYlnWQ.OiyHrYluI2ma2UKtAim6Of.rwALJ3TRe', '2025-01-10 20:06:14', '2025-01-10 20:06:14', 0);
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `accommodations`
+-- Indexes for table `bookings`
 --
-ALTER TABLE `accommodations`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `itinerary_id` (`itinerary_id`);
-
---
--- Indexes for table `activities`
---
-ALTER TABLE `activities`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `itinerary_id` (`itinerary_id`);
-
---
--- Indexes for table `cars`
---
-ALTER TABLE `cars`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `itinerary_id` (`itinerary_id`);
-
---
--- Indexes for table `costs`
---
-ALTER TABLE `costs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `entity_id` (`entity_id`);
-
---
--- Indexes for table `flights`
---
-ALTER TABLE `flights`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `itinerary_id` (`itinerary_id`);
-
---
--- Indexes for table `itineraries`
---
-ALTER TABLE `itineraries`
+ALTER TABLE `bookings`
   ADD PRIMARY KEY (`id`),
   ADD KEY `trip_id` (`trip_id`);
 
 --
--- Indexes for table `others`
+-- Indexes for table `todos`
 --
-ALTER TABLE `others`
+ALTER TABLE `todos`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `itinerary_id` (`itinerary_id`);
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `trips`
@@ -261,104 +158,50 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `accommodations`
+-- AUTO_INCREMENT for table `bookings`
 --
-ALTER TABLE `accommodations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `bookings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
--- AUTO_INCREMENT for table `activities`
+-- AUTO_INCREMENT for table `todos`
 --
-ALTER TABLE `activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `cars`
---
-ALTER TABLE `cars`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `costs`
---
-ALTER TABLE `costs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `flights`
---
-ALTER TABLE `flights`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `itineraries`
---
-ALTER TABLE `itineraries`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `others`
---
-ALTER TABLE `others`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `todos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `trips`
 --
 ALTER TABLE `trips`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `accommodations`
+-- Constraints for table `bookings`
 --
-ALTER TABLE `accommodations`
-  ADD CONSTRAINT `accommodations_ibfk_1` FOREIGN KEY (`itinerary_id`) REFERENCES `itineraries` (`id`) ON DELETE CASCADE;
+ALTER TABLE `bookings`
+  ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`trip_id`) REFERENCES `trips` (`id`);
 
 --
--- Constraints for table `activities`
+-- Constraints for table `todos`
 --
-ALTER TABLE `activities`
-  ADD CONSTRAINT `activities_ibfk_1` FOREIGN KEY (`itinerary_id`) REFERENCES `itineraries` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `cars`
---
-ALTER TABLE `cars`
-  ADD CONSTRAINT `cars_ibfk_1` FOREIGN KEY (`itinerary_id`) REFERENCES `itineraries` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `flights`
---
-ALTER TABLE `flights`
-  ADD CONSTRAINT `flights_ibfk_1` FOREIGN KEY (`itinerary_id`) REFERENCES `itineraries` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `itineraries`
---
-ALTER TABLE `itineraries`
-  ADD CONSTRAINT `itineraries_ibfk_1` FOREIGN KEY (`trip_id`) REFERENCES `trips` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `others`
---
-ALTER TABLE `others`
-  ADD CONSTRAINT `others_ibfk_1` FOREIGN KEY (`itinerary_id`) REFERENCES `itineraries` (`id`) ON DELETE CASCADE;
+ALTER TABLE `todos`
+  ADD CONSTRAINT `todos_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `trips`
 --
 ALTER TABLE `trips`
-  ADD CONSTRAINT `trips_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `trips_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
