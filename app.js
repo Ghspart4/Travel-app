@@ -71,18 +71,21 @@ app.get('/login', (req, res) => {
     res.render('login.ejs');
 });
 
-
-// Admin Route: View all users
 app.get('/adminOnly', isAuthenticated, isRole('admin'), async (req, res) => {
     try {
         const [users] = await pool.execute('SELECT id, fullname, email, role FROM users');
-        res.render('adminOnly', { admin: req.session.email, users });
+        res.render('adminOnly', { 
+            admin: {
+                fullName: req.session.email,
+                email: req.session.email
+            }, 
+            users 
+        });
     } catch (err) {
         console.error('Database error:', err);
         res.status(500).send('Error fetching data');
     }
 });
-
 app.get('/premiumOnly', isAuthenticated, isRole('premium'), async (req, res) => {
     try {
         const userId = req.session.userId;
